@@ -1,0 +1,43 @@
+name: Build and Publish ASP Page to Windows Server
+
+on:
+  push:
+    branches: ["main"]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the Repo
+        uses: actions/checkout@v3
+      
+      - name: Install .NET Environment
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.0.300' #${{ env.DOTNET_VERSION }}
+      
+      - name: Verify the .NET Installation
+        run: dotnet --version
+
+      - name: Build the app with dotnet
+        run: dotnet build --configuration Release
+      
+      - name: Publish the deployment package in public folder
+        run: dotnet publish -c Release -o public #${{env.DOTNET_ROOT}}/public
+      
+      - name: Verify the Public Folder
+        run: ls -la public
+      
+      - name: Zip the public folder
+        run: zip -r public.zip public/
+
+      - name: Check whether Zip file is correct or not
+        run: ls -l public.zip
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: .net-app
+          path: curl -H "X-JFrog-Art-Api:AKCp8mZT7Zbv2H9JUemuUGhtFw3k9BkvYtoMfF2avcnpjCDYdkGHaMg711yXLLf8LD7HLumcC" -T <PATH_TO_FILE> "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/<TARGET_FILE_PATH>"
