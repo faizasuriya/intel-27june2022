@@ -1,0 +1,7 @@
+/home/rps/Desktop/intel-27june2022/public/intel-27june2022
+/home/rps/Desktop/intel-27june2022/public/appsettings.Development.json
+/home/rps/Desktop/intel-27june2022/public/appsettings.json
+/home/rps/Desktop/intel-27june2022/public/intel-27june2022.dll
+/home/rps/Desktop/intel-27june2022/public/intel-27june2022.deps.json
+/home/rps/Desktop/intel-27june2022/public/intel-27june2022.runtimeconfig.json
+/home/rps/Desktop/intel-27june2022/public/intel-27june2022.pdb
