@@ -40,4 +40,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: .net-app
-          path: curl -H "X-JFrog-Art-Api:AKCp8mZT7Zbv2H9JUemuUGhtFw3k9BkvYtoMfF2avcnpjCDYdkGHaMg711yXLLf8LD7HLumcC" -T <PATH_TO_FILE> "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/<TARGET_FILE_PATH>"
+          run: curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip"
+               curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-latest.zip"
