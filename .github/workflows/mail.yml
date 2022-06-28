@@ -47,7 +47,14 @@ jobs:
     steps:
 
       - name: Download the file from JFROG
-        run: curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -O "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip"
+        run: curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -O "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip" -L
 
       - name: Test, if the File is downloaded successfully or not.
         run: ls -la
+
+      - name: Unzip the folder
+        run: unzip public-$GITHUB_RUN_NUMBER.zip
+      
+      - name: Checl the Public folder
+        run: ls -la
+             ls -la /public
