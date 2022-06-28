@@ -1,0 +1,77 @@
+name: Method 1- Copy Files via SSH to Windows Server
+
+on:
+  # push:
+  #   branches:
+  #     - main
+
+  workflow_dispatch:
+
+env:
+  GITHUBRUNNERID: $GITHUB_RUN_NUMBER
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout of the Code
+        uses: actions/checkout@v3
+
+      - name: Install .NET Environment
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.0.300'
+
+      - name: Verify the .NET Installation
+        run: dotnet --version
+
+      - name: Build the Application with .NET
+        run: dotnet build --configuration Release
+
+      - name: Publish the Deployment Package in public folder
+        run: dotnet publish -c Release -o public
+
+      - name: Zip the Public Folder
+        run: zip -r public.zip public/
+
+      - name: Check weather Zip file is created or not.
+        run: ls -l public.zip
+
+      - name: Copy the Public Folder to Ubuntu
+        uses: marcodallasanta/ssh-scp-deploy@v1.2.0
+        with:
+          local: 'public/*'
+          remote: 'public/'
+          host: ${{secrets.HOST}}
+          user: ${{secrets.USER}}
+          password: ${{secrets.PASSWORD}}
+          ssh_options: -o StrictHostKeyChecking=no
+          pre_upload: rmdir /s /q public
+          post_upload: iisreset /stop && xcopy /s /y public C:\inetpub\wwwroot\ && iisreset /start
+      
+
+      # - name: Upload to Artifact
+      #   run: |
+      #     curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://nishanthinteldemo.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip"
+
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   steps:
+
+  #     - name: Download the file from JFROG
+  #       run: |
+  #         curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -O "https://nishanthinteldemo.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip" -L
+
+  #     - name: Test, if the File is downloaded successfully or not.
+  #       run: |
+  #         ls -la
+
+  #     - name: Lets Unzip the Folder
+  #       run: |
+  #         unzip public-$GITHUB_RUN_NUMBER.zip
+
+  #     - name: Check the Contents of the Public Directory
+  #       run: |
+  #         ls -la

@@ -1,0 +1,66 @@
+name: Method 3 - Deploy to IIS using Artifactory and JFrog Cli
+
+on:
+  # push:
+  #   branches:
+  #     - main
+
+  workflow_dispatch:
+
+env:
+  GITHUBRUNNERID: $GITHUB_RUN_NUMBER
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout of the Code
+        uses: actions/checkout@v3
+
+      - name: Install .NET Environment
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.0.300'
+
+      - name: Verify the .NET Installation
+        run: dotnet --version
+
+      - name: Build the Application with .NET
+        run: dotnet build --configuration Release
+
+      - name: Publish the Deployment Package in public folder
+        run: dotnet publish -c Release -o public
+
+      - name: Zip the public folder
+        run: zip -r public.zip public/
+
+      - name: Create a Artifact using from the public folder
+        uses: actions/upload-artifact@v3
+        with:
+          name: public-folder-to-be-deployed-to-iis
+          path: public.zip   
+
+      - name: Check Weather Zip Folder is created or not
+        run: ls -l public.zip
+
+      - name: Upload to Artifact
+        run: |
+          curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip"
+          curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-latest.zip"
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    steps:
+
+      - name: Run JFrog CLI
+        run: |
+          jf rt dl aspdotnet-generic-local/public-latest.zip public.zip
+      - name: Unzip the File
+        run: |
+          Expand-Archive .\public.zip . -Force
+      - name: Copy the Files from Work Dir to IIS Directory
+        run: |
+          iisreset /stop
+          Copy-Item ./public/* C:/inetpub/wwwroot/ -Recurse -Force
+          iisreset /start
