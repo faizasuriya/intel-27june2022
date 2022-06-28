@@ -42,10 +42,7 @@ jobs:
         run: ls -l public.zip
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: .net-app
-          path: curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip"
+          run: curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip"
                 #curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip"
                 #curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-latest.zip"
 
