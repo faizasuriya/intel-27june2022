@@ -1,8 +1,9 @@
-name: Build and Publish ASP Page to Windows Server
+name: Deploy .NET Core Web Application to IIS Server
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
 
   workflow_dispatch:
 
@@ -12,46 +13,41 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout the Repo
+
+      - name: Checkout of the Code
         uses: actions/checkout@v3
-      
+
       - name: Install .NET Environment
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: '6.0.300' #${{ env.DOTNET_VERSION }}
-      
+          dotnet-version: '6.0.300'
+
       - name: Verify the .NET Installation
         run: dotnet --version
 
-      - name: Build the app with dotnet
+      - name: Build the Application with .NET
         run: dotnet build --configuration Release
-      
-      - name: Publish the deployment package in public folder
-        run: dotnet publish -c Release -o public #${{env.DOTNET_ROOT}}/public
-      
-      - name: Verify the Public Folder
-        run: ls -la public
-      
-      - name: Zip the public folder
+
+      - name: Publish the Deployment Package in public folder
+        run: dotnet publish -c Release -o public
+
+      - name: Zip the Public Folder
         run: zip -r public.zip public/
 
-      - name: Check whether Zip file is correct or not
+      - name: Check weather Zip file is created or not.
         run: ls -l public.zip
 
-      - name: Upload artifact for deployment job
-          run: curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip"
-                #curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip"
-                #curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-latest.zip"
+      - name: Upload to Artifact
+        run: curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip"
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     steps:
 
-      - name: Dowload the file from JFROG
+      - name: Download the file from JFROG
         run: curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -O "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip"
 
-      - name: Test, if the file is dowloaded successfully or not
+      - name: Test, if the File is downloaded successfully or not.
         run: ls -la
