@@ -6,6 +6,9 @@ on:
 
   workflow_dispatch:
 
+env:
+  GITHUNRUNNERID: $GITHUB_RUN_NUMBER
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -41,4 +44,16 @@ jobs:
         with:
           name: .net-app
           path: curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip"
-                curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-latest.zip"
+                #curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip"
+                #curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -T public.zip "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-latest.zip"
+
+  deploy:
+    run-on: ubuntu-latest
+    needs: build
+    steps:
+
+      - name: Dowload the file from JFROG
+        run: curl -H "X-JFrog-Art-Api:${{ secrets.JFROGKEY }}" -O "https://myenvjfrog.jfrog.io/artifactory/jfrogintel27june2022-generic-local/public-$GITHUB_RUN_NUMBER.zip"
+
+      - name: Test, if the file is dowloaded successfully or not
+        run: ls -la
